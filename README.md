@@ -43,5 +43,5 @@ The predictions obtained in the results page will be one of them:
 6: 'Obesity Type III'
 
 ## Models
-
+We used Neural Netowrk model for deployement. We also used Logistic Regression, KNN, Naive Bayes, SVM models. 
 
