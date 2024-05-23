@@ -44,4 +44,12 @@ The predictions obtained in the results page will be one of them:
 
 ## Models
 We used Neural Netowrk model for deployement. We also used Logistic Regression, KNN, Naive Bayes, SVM models. 
+After using different ml methods on the dataset ‘Multi-class Prediction of
+Obesity Risk’. Based on the results we conclude that the neural
+networks are comparatively performing better than other ml techniques.
+So, we have considered the neural network model for developing the user
+interface.
+
+## User Interface
+Created a basic UI so that from the given input data the model can predict the Obesity level.
 
