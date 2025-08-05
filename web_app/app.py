@@ -2,9 +2,17 @@ from flask import Flask, render_template, request
 from tensorflow.keras.models import load_model
 import pandas as pd
 import numpy as np
+import sys
+import os
+
+# Add parent directory to path to import config
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from config import MODEL_PATH, OBESITY_LABELS, NUMERICAL_COLUMNS
+from config import GENDER_MAPPING, MTRANS_MAPPING, FAMILY_HISTORY_MAPPING
+from config import FAVC_MAPPING, SMOKE_MAPPING, SCC_MAPPING, CAEC_MAPPING, CALC_MAPPING
 
 app = Flask(__name__)
-model = load_model('my_model_nn_1.h5')
+model = load_model(MODEL_PATH)
 
 @app.route('/')
 def form():
@@ -26,21 +34,14 @@ def predict():
 def preprocess(data):
     # Map categorical variables to numerical values
     mappings = {
-        'gender': {'Male': 0, 'Female': 1},
-        'mtrans': {
-            'Automobile': 0, 'Bike': 1, 'Motorbike': 2, 
-            'Public_Transportation': 3, 'Walking': 4
-        },
-        'family_history_with_overweight': {'no': 0, 'yes': 1},
-        'favc': {'no': 0, 'yes': 1},
-        'smoke': {'no': 0, 'yes': 1},
-        'scc': {'no': 0, 'yes': 1},
-        'caec': {
-            'no': 0, 'Sometimes': 1, 'Frequently': 2, 'Always': 3
-        },
-        'calc': {
-            'no': 0, 'Sometimes': 1, 'Frequently': 2, 'Always': 3
-        }
+        'gender': GENDER_MAPPING,
+        'mtrans': MTRANS_MAPPING,
+        'family_history_with_overweight': FAMILY_HISTORY_MAPPING,
+        'favc': FAVC_MAPPING,
+        'smoke': SMOKE_MAPPING,
+        'scc': SCC_MAPPING,
+        'caec': CAEC_MAPPING,
+        'calc': CALC_MAPPING
     }
 
     # Apply mappings to the data
@@ -49,8 +50,7 @@ def preprocess(data):
             data[column] = data[column].map(mapping).astype(float)
 
     # Convert numerical columns to float
-    numerical_cols = ['age', 'height', 'weight', 'fcvc', 'ncp', 'faf', 'tue', 'ch2o']
-    for col in numerical_cols:
+    for col in NUMERICAL_COLUMNS:
         if col in data:
             data[col] = data[col].astype(float)
 
@@ -60,11 +60,7 @@ def preprocess(data):
 def get_prediction(data, model):
     predictions = model.predict(data)
     highest_labels = np.argmax(predictions, axis=1)
-    map_label = {
-        0: 'Insufficient Weight', 1: 'Normal Weight', 2: 'Overweight Level I',
-        3: 'Overweight Level II', 4: 'Obesity Type I', 5: 'Obesity Type II', 6: 'Obesity Type III'
-    }
-    highest_labels_mapped = [map_label[label] for label in highest_labels]
+    highest_labels_mapped = [OBESITY_LABELS[label] for label in highest_labels]
     return highest_labels_mapped
 
 if __name__ == '__main__':
