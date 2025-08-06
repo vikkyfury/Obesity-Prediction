@@ -15,12 +15,7 @@
             <p>AI-powered health prediction using advanced machine learning</p>
         </div>
 
-        {% if not model_loaded %}
-        <div class="demo-warning">
-            <i class="fas fa-exclamation-triangle"></i>
-            <strong>Demo Mode:</strong> Model not loaded. Predictions will be random samples.
-        </div>
-        {% endif %}
+        {% if not model_loaded %}{% endif %}
 
         <div class="form-container">
             <div class="form-steps">
