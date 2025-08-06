@@ -140,4 +140,12 @@ def predict():
         return f"Error: {str(e)}", 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    # Production settings for EC2 deployment
+    debug_mode = os.environ.get('FLASK_DEBUG', '0') == '1'
+    port = int(os.environ.get('PORT', 5000))
+    host = os.environ.get('HOST', '0.0.0.0')  # Allow external connections
+    
+    print(f"Starting Flask app on {host}:{port}")
+    print(f"Debug mode: {debug_mode}")
+    
+    app.run(debug=debug_mode, host=host, port=port)
