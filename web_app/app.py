@@ -12,24 +12,59 @@ from config import GENDER_MAPPING, MTRANS_MAPPING, FAMILY_HISTORY_MAPPING
 from config import FAVC_MAPPING, SMOKE_MAPPING, SCC_MAPPING, CAEC_MAPPING, CALC_MAPPING
 
 app = Flask(__name__)
-model = load_model(MODEL_PATH)
+
+# Load model with custom_objects to handle compatibility issues
+model = None
+try:
+    # Try loading with custom_objects to handle compatibility
+    from tensorflow.keras import Model
+    from tensorflow.keras.layers import InputLayer
+    
+    # Create a custom InputLayer that ignores batch_shape
+    class CompatibleInputLayer(InputLayer):
+        def __init__(self, **kwargs):
+            # Remove batch_shape if present
+            kwargs.pop('batch_shape', None)
+            super().__init__(**kwargs)
+    
+    model = load_model(MODEL_PATH, compile=False, custom_objects={
+        'Model': Model,
+        'InputLayer': CompatibleInputLayer
+    })
+    print("Model loaded successfully!")
+except Exception as e:
+    print(f"Error loading model: {e}")
+    print("Model loading failed. The model was saved with an older TensorFlow version.")
+    print("Please retrain the model using the current TensorFlow version.")
+    print("For now, the application will run in demo mode.")
+    model = None
 
 @app.route('/')
 def form():
-    return render_template('full.html')
+    return render_template('full.html', model_loaded=model is not None)
 
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
         data = request.form.to_dict()
         print("Received data:", data)  # Logging input data
+        
+        if model is None:
+            # Demo mode - return a sample prediction
+            import random
+            demo_predictions = list(OBESITY_LABELS.values())
+            demo_prediction = random.choice(demo_predictions)
+            return render_template('output.html', 
+                                prediction=demo_prediction, 
+                                demo_mode=True)
+        
         data = pd.DataFrame([data])
         processed_data = preprocess(data)
         prediction = get_prediction(processed_data, model)
         return render_template('output.html', prediction=prediction[0])
     except Exception as e:
         print("Error:", e)  # Logging errors
-        return str(e)  # Returning errors to the browser for debugging
+        return f"Error: {str(e)}", 500
 
 def preprocess(data):
     # Map categorical variables to numerical values
@@ -64,4 +99,4 @@ def get_prediction(data, model):
     return highest_labels_mapped
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)

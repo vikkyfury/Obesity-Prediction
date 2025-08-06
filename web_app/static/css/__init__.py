@@ -1,0 +1,1 @@
+# CSS styles package for Obesity Prediction web application 

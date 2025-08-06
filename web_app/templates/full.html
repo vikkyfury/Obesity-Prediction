@@ -2,137 +2,250 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Data Input Form</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-        form {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            width: 300px;
-        }
-        h2 {
-            text-align: center;
-        }
-        label {
-            margin-top: 10px;
-            display: block;
-        }
-        input, select {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-        }
-        input[type="submit"] {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obesity Risk Assessment | AI Health Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
 <body>
-    <form action="/predict" method="post">
-        <h2>User Data Input Form</h2>
+    <div class="main-container">
+        <div class="header">
+            <h1><i class="fas fa-heartbeat"></i> Obesity Risk Assessment</h1>
+            <p>AI-powered health prediction using advanced machine learning</p>
+        </div>
 
-        <label for="gender">Gender:</label>
-        <select id="gender" name="gender">
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-        </select>
+        {% if not model_loaded %}
+        <div class="demo-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Demo Mode:</strong> Model not loaded. Predictions will be random samples.
+        </div>
+        {% endif %}
 
-        <label for="age">Age:</label>
-        <input type="number" id="age" name="age" step="0.01">
+        <div class="form-container">
+            <div class="form-steps">
+                <div class="step active">Personal Info</div>
+                <div class="step">Health Data</div>
+                <div class="step">Lifestyle</div>
+            </div>
 
-        <label for="height">Height in meters:</label>
-        <input type="number" id="height" name="height" step="0.01">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
 
-        <label for="weight">Weight in Kilograms:</label>
-        <input type="number" id="weight" name="weight" step="0.01">
+            <form action="/predict" method="post" id="predictionForm">
+                <div class="form-grid">
+                    <!-- Personal Information -->
+                    <div class="form-group">
+                        <label for="gender">Gender <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-venus-mars"></i>
+                            <select id="gender" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                    </div>
 
-        <label for="family_history_with_overweight">Family history of overweight:</label>
-        <select id="family_history_with_overweight" name="family_history_with_overweight">
-            <option value="no">No</option>
-            <option value="yes">Yes</option>
-        </select>
+                    <div class="form-group">
+                        <label for="age">Age (years) <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-birthday-cake"></i>
+                            <input type="number" id="age" name="age" min="1" max="120" placeholder="Enter your age" required>
+                        </div>
+                        <div class="help-text">Age range: 1-120 years</div>
+                    </div>
 
-        <label for="favc">Frequent consumption of high caloric food (FAVC):</label>
-        <select id="favc" name="favc">
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-        </select>
+                    <div class="form-group">
+                        <label for="height">Height (cm) <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-ruler-vertical"></i>
+                            <input type="number" id="height" name="height" min="50" max="250" step="0.1" placeholder="Enter height in cm" required>
+                        </div>
+                        <div class="help-text">Height range: 50-250 cm</div>
+                    </div>
 
-        <label for="fcvc">Frequency of vegetables consumption (FCVC):</label>
-        <input type="number" id="fcvc" name="fcvc" step="0.01">
+                    <div class="form-group">
+                        <label for="weight">Weight (kg) <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-weight"></i>
+                            <input type="number" id="weight" name="weight" min="20" max="300" step="0.1" placeholder="Enter weight in kg" required>
+                        </div>
+                        <div class="help-text">Weight range: 20-300 kg</div>
+                    </div>
 
-        <label for="ncp">Number of main meals (NCP):</label>
-        <input type="number" id="ncp" name="ncp" step="0.01">
+                    <!-- Health Information -->
+                    <div class="form-group">
+                        <label for="family_history_with_overweight">Family History <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-users"></i>
+                            <select id="family_history_with_overweight" name="family_history_with_overweight" required>
+                                <option value="">Select Option</option>
+                                <option value="no">No family history</option>
+                                <option value="yes">Has family history</option>
+                            </select>
+                        </div>
+                    </div>
 
-        <label for="caec">Consumption of food between meals (CAEC):</label>
-        <select id="caec" name="caec">
-            <option value="Sometimes">Sometimes</option>
-            <option value="Always">Always</option>
-            <option value="Frequently">Frequently</option>
-            <option value="no">No</option>
-        </select>
+                    <div class="form-group">
+                        <label for="favc">High Caloric Food Consumption <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-hamburger"></i>
+                            <select id="favc" name="favc" required>
+                                <option value="">Select Option</option>
+                                <option value="no">Rarely</option>
+                                <option value="yes">Frequently</option>
+                            </select>
+                        </div>
+                    </div>
 
-        <label for="smoke">Smoking:</label>
-        <select id="smoke" name="smoke">
-            <option value="no">No</option>
-            <option value="yes">Yes</option>
-        </select>
+                    <div class="form-group">
+                        <label for="fcvc">Vegetable Consumption <span class="required">*</span></label>
+                        <div class="range-container">
+                            <input type="range" id="fcvc" name="fcvc" min="1" max="3" step="1" value="2" class="range-slider" required>
+                            <div class="range-value" id="fcvcValue">Sometimes (2 times/day)</div>
+                            <div class="range-labels">
+                                <span>Never</span>
+                                <span>Sometimes</span>
+                                <span>Always</span>
+                            </div>
+                        </div>
+                    </div>
 
-        <label for="ch2o">Water drinking per day (CH2O):</label>
-        <input type="number" id="ch2o" name="ch2o" step="0.01">
+                    <div class="form-group">
+                        <label for="ncp">Main Meals per Day <span class="required">*</span></label>
+                        <div class="range-container">
+                            <input type="range" id="ncp" name="ncp" min="1" max="4" step="1" value="3" class="range-slider" required>
+                            <div class="range-value" id="ncpValue">3 meals</div>
+                            <div class="range-labels">
+                                <span>1 meal</span>
+                                <span>2 meals</span>
+                                <span>3 meals</span>
+                                <span>4 meals</span>
+                            </div>
+                        </div>
+                    </div>
 
-        <label for="scc">Calories monitoring (SCC):</label>
-        <select id="scc" name="scc">
-            <option value="no">No</option>
-            <option value="yes">Yes</option>
-        </select>
+                    <div class="form-group">
+                        <label for="caec">Snacking Between Meals <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-clock"></i>
+                            <select id="caec" name="caec" required>
+                                <option value="">Select Frequency</option>
+                                <option value="no">Never</option>
+                                <option value="Sometimes">Sometimes</option>
+                                <option value="Frequently">Frequently</option>
+                                <option value="Always">Always</option>
+                            </select>
+                        </div>
+                    </div>
 
-        <label for="faf">Physical activity frequency (FAF):</label>
-        <input type="number" id="faf" name="faf" step="0.01">
+                    <div class="form-group">
+                        <label for="smoke">Smoking <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-smoking"></i>
+                            <select id="smoke" name="smoke" required>
+                                <option value="">Select Option</option>
+                                <option value="no">Non-smoker</option>
+                                <option value="yes">Smoker</option>
+                            </select>
+                        </div>
+                    </div>
 
-        <label for="tue">Time using technology devices (TUE):</label>
-        <input type="number" id="tue" name="tue" step="0.01">
+                    <div class="form-group">
+                        <label for="ch2o">Water Consumption <span class="required">*</span></label>
+                        <div class="range-container">
+                            <input type="range" id="ch2o" name="ch2o" min="1" max="5" step="0.5" value="2" class="range-slider" required>
+                            <div class="range-value" id="ch2oValue">2.0 liters/day</div>
+                            <div class="range-labels">
+                                <span>1L</span>
+                                <span>2L</span>
+                                <span>3L</span>
+                                <span>4L</span>
+                                <span>5L</span>
+                            </div>
+                        </div>
+                    </div>
 
-        <label for="calc">Alcohol consumption (CALC):</label>
-        <select id="calc" name="calc">
-            <option value="Sometimes">Sometimes</option>
-            <option value="no">No</option>
-            <option value="Frequently">Frequently</option>
-            <option value="Always">Always</option>
-        </select>
+                    <div class="form-group">
+                        <label for="scc">Calorie Monitoring <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-calculator"></i>
+                            <select id="scc" name="scc" required>
+                                <option value="">Select Option</option>
+                                <option value="no">Don't monitor</option>
+                                <option value="yes">Monitor calories</option>
+                            </select>
+                        </div>
+                    </div>
 
-        <label for="mtrans">Mode of Transportation (MTRANS):</label>
-        <select id="mtrans" name="mtrans">
-            <option value="Public_Transportation">Public Transportation</option>
-            <option value="Automobile">Automobile</option>
-            <option value="Walking">Walking</option>
-            <option value="Bike">Bike</option>
-            <option value="Motorbike">Motorbike</option>
-        </select>
+                    <div class="form-group">
+                        <label for="faf">Physical Activity <span class="required">*</span></label>
+                        <div class="range-container">
+                            <input type="range" id="faf" name="faf" min="0" max="3" step="1" value="1" class="range-slider" required>
+                            <div class="range-value" id="fafValue">1-2 days/week</div>
+                            <div class="range-labels">
+                                <span>Never</span>
+                                <span>1-2 days</span>
+                                <span>2-4 days</span>
+                                <span>4-5 days</span>
+                            </div>
+                        </div>
+                    </div>
 
-        <input type="submit" value="Submit">
-    </form>
+                    <div class="form-group">
+                        <label for="tue">Technology Usage <span class="required">*</span></label>
+                        <div class="range-container">
+                            <input type="range" id="tue" name="tue" min="0" max="2" step="1" value="1" class="range-slider" required>
+                            <div class="range-value" id="tueValue">3-5 hours/day</div>
+                            <div class="range-labels">
+                                <span>0-2 hours</span>
+                                <span>3-5 hours</span>
+                                <span>5+ hours</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="calc">Alcohol Consumption <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-wine-glass"></i>
+                            <select id="calc" name="calc" required>
+                                <option value="">Select Frequency</option>
+                                <option value="no">Never</option>
+                                <option value="Sometimes">Sometimes</option>
+                                <option value="Frequently">Frequently</option>
+                                <option value="Always">Always</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mtrans">Transportation Mode <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-car"></i>
+                            <select id="mtrans" name="mtrans" required>
+                                <option value="">Select Transportation</option>
+                                <option value="Walking">Walking</option>
+                                <option value="Bike">Bicycle</option>
+                                <option value="Motorbike">Motorbike</option>
+                                <option value="Public_Transportation">Public Transport</option>
+                                <option value="Automobile">Car</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="submit-section">
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-brain"></i> Get AI Prediction
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

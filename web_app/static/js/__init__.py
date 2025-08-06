@@ -1,0 +1,1 @@
+# JavaScript package for Obesity Prediction web application 

@@ -2,58 +2,75 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Prediction</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            flex-direction: column;
-        }
-        div, form {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            width: 300px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        h2 {
-            margin-bottom: 10px;
-        }
-        p {
-            font-size: 16px;
-            color: #4CAF50; /* Adds emphasis to the prediction */
-            font-weight: bold;
-        }
-        a, input[type="submit"] {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        a:hover, input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obesity Risk Prediction Result | AI Health Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/result.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div>
-        <h2>Prediction Result</h2>
-        <p>Your predicted category: <strong>{{ prediction }}</strong></p>
-        <a href="/">Submit another response</a>
+    <div class="main-container">
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> Prediction Result</h1>
+            <p>Your AI-powered obesity risk assessment</p>
+        </div>
+
+        {% if demo_mode %}
+        <div class="demo-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Demo Mode:</strong> This is a sample prediction. Model not loaded due to compatibility issues.
+        </div>
+        {% endif %}
+
+        <div class="content">
+            <div class="result-card">
+                <div class="result-label">Your Predicted Category</div>
+                <div class="result-value">{{ prediction }}</div>
+                
+                {% if prediction %}
+                    {% if 'Insufficient' in prediction %}
+                        <div class="category-indicator category-insufficient">{{ prediction }}</div>
+                    {% elif 'Normal' in prediction %}
+                        <div class="category-indicator category-normal">{{ prediction }}</div>
+                    {% elif 'Overweight' in prediction %}
+                        <div class="category-indicator category-overweight">{{ prediction }}</div>
+                    {% elif 'Obesity' in prediction %}
+                        <div class="category-indicator category-obesity">{{ prediction }}</div>
+                    {% else %}
+                        <div class="category-indicator">{{ prediction }}</div>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+            <div class="bmi-info">
+                <h4><i class="fas fa-info-circle"></i> Understanding Your Result</h4>
+                <div class="bmi-categories">
+                    <strong>BMI Categories:</strong><br>
+                    • <strong>Insufficient Weight:</strong> BMI < 18.5<br>
+                    • <strong>Normal Weight:</strong> BMI 18.5 - 24.9<br>
+                    • <strong>Overweight:</strong> BMI 25.0 - 29.9<br>
+                    • <strong>Obesity Type I:</strong> BMI 30.0 - 34.9<br>
+                    • <strong>Obesity Type II:</strong> BMI 35.0 - 39.9<br>
+                    • <strong>Obesity Type III:</strong> BMI ≥ 40.0
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="/" class="btn btn-primary">
+                    <i class="fas fa-redo"></i> Submit Another Response
+                </a>
+                <button onclick="window.print()" class="btn btn-secondary">
+                    <i class="fas fa-print"></i> Print Result
+                </button>
+            </div>
+
+            <div class="disclaimer">
+                <i class="fas fa-shield-alt"></i>
+                <strong>Medical Disclaimer:</strong> This prediction is for educational purposes only and should not replace professional medical advice. Always consult with healthcare professionals for accurate diagnosis and treatment.
+            </div>
+        </div>
     </div>
+
+    <script src="{{ url_for('static', filename='js/result.js') }}"></script>
 </body>
 </html>

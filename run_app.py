@@ -25,7 +25,7 @@ def main():
         sys.exit(1)
     
     print("Starting Obesity Prediction Web Application...")
-    print("Navigate to http://localhost:5000 in your browser")
+    print("Navigate to http://localhost:5001 in your browser")
     print("Press Ctrl+C to stop the server")
     
     try:
